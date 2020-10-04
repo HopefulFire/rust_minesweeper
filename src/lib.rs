@@ -100,7 +100,7 @@ impl Board
     {
         match &self.board[*x][*y]
         {
-            Tile::Near(n) =>
+            Tile::Near(_) =>
             {
                 return false;
             },
@@ -120,7 +120,7 @@ impl Board
                     },
                 }
             },
-            Tile::Flagged(boxed) =>
+            Tile::Flagged(_) =>
             {
                 return false;
             },
