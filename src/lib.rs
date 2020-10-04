@@ -95,14 +95,14 @@ impl Board
         }
         return true;
     }
-    fn touch_mine(&mut self, x:&usize, y:&usize)
-    -> Tile
+    fn touch_tile(&mut self, x:&usize, y:&usize)
+    -> bool
     {
         match &self.board[*x][*y]
         {
             Tile::Near(n) =>
             {
-                // do nothing
+                return false;
             },
             Tile::HiddenMine(value) =>
             {
@@ -110,24 +110,25 @@ impl Board
                 {
                     true =>
                     {
-                        self.board[*x][*y] = Tile::Mined
+                        self.board[*x][*y] = Tile::Mined;
+                        return true;
                     },
                     false =>
                     {
                         self.board[*x][*y] = Tile::Near(self.find_nearby(&x, &y));
+                        return false;
                     },
                 }
             },
             Tile::Flagged(boxed) =>
             {
-                // do nothing
+                return false;
             },
             Tile::Mined =>
             {
-                // do nothing
+                return true;
             }
         }
-        return self.board[*x][*y];
     }
     fn find_nearby(&self, origin_x:&usize, origin_y:&usize)
     -> usize
