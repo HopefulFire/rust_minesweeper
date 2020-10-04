@@ -1,6 +1,15 @@
 use rust_minesweeper::*;
 
 fn main() {
-    let board = Board::new(&10, &10, &10).unwrap();
-    board.display();
+    match Board::new(&10, &10, &10)
+    {
+        Ok(board) =>
+        {
+            board.display()
+        }
+        Err(message) =>
+        {
+            println!("{}", message);
+        }
+    }
 }
