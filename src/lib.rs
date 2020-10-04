@@ -102,7 +102,7 @@ impl Board
         {
             Tile::Near(n) =>
             {
-                return Tile::Near(*n);
+                // do nothing
             },
             Tile::HiddenMine(value) =>
             {
@@ -110,23 +110,24 @@ impl Board
                 {
                     true =>
                     {
-                        return Tile::Mined;
+                        self.board[*x][*y] = Tile::Mined
                     },
                     false =>
                     {
-                        return Tile::Near(self.find_nearby(&x, &y));
+                        self.board[*x][*y] = Tile::Near(self.find_nearby(&x, &y));
                     },
                 }
             },
             Tile::Flagged(boxed) =>
             {
-                return Tile::Flagged(boxed.clone());
+                // do nothing
             },
             Tile::Mined =>
             {
-                return Tile::Mined;
+                // do nothing
             }
         }
+        return self.board[*x][*y];
     }
     fn find_nearby(&self, origin_x:&usize, origin_y:&usize)
     -> usize
