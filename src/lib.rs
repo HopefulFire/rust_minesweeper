@@ -67,6 +67,46 @@ impl Board
             println!("");
         }
     }
+    pub fn touch_tile(&mut self, x:&usize, y:&usize)
+    -> bool
+    {
+        match &self.board[*x][*y]
+        {
+            Tile::Near(_) =>
+            {
+                return false;
+            },
+            Tile::HiddenMine(value) =>
+            {
+                match value
+                {
+                    true =>
+                    {
+                        self.board[*x][*y] = Tile::Mined;
+                        return true;
+                    },
+                    false =>
+                    {
+                        let nearby_mines = self.find_nearby(&x, &y);
+                        self.board[*x][*y] = Tile::Near(nearby_mines);
+                        if !self.is_exposed(x, y) && nearby_mines == 0
+                        {
+                            self.touch_nearby(x, y)
+                        }
+                        return false;
+                    },
+                }
+            },
+            Tile::Flagged(_) =>
+            {
+                return false;
+            },
+            Tile::Mined =>
+            {
+                return true;
+            }
+        }
+    }
     fn generate(&mut self, x_size:&usize, y_size:&usize, mines:&usize)
     -> bool
     {
@@ -97,40 +137,67 @@ impl Board
         }
         return true;
     }
-    fn touch_tile(&mut self, x:&usize, y:&usize)
+    fn is_within(&self, x:&isize, y:&isize)
     -> bool
     {
-        match &self.board[*x][*y]
+        if *x < 0
+        || *y < 0
+        || *x > self.board.len() as isize
+        || *y > self.board[*x as usize].len() as isize
         {
-            Tile::Near(_) =>
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+    fn touch_nearby(&mut self, origin_x:&usize, origin_y:&usize)
+    {
+        for dx in -1..=1
+        {
+            let x = *origin_x as isize - 1;
+            for dy in -1..=1
             {
-                return false;
-            },
-            Tile::HiddenMine(value) =>
-            {
-                match value
+                let y = *origin_y as isize - 1;
+                if self.is_within(&x, &y) && dx != 0 && dy != 0
                 {
-                    true =>
-                    {
-                        self.board[*x][*y] = Tile::Mined;
-                        return true;
-                    },
-                    false =>
-                    {
-                        self.board[*x][*y] = Tile::Near(self.find_nearby(&x, &y));
-                        return false;
-                    },
+                    self.touch_tile(&(x as usize), &(y as usize));
                 }
-            },
-            Tile::Flagged(_) =>
-            {
-                return false;
-            },
-            Tile::Mined =>
-            {
-                return true;
             }
         }
+    }
+    fn is_exposed(&self, origin_x:&usize, origin_y:&usize)
+    -> bool
+    {
+        let mut exposed = true;
+        for dx in -1..=1
+        {
+            let x = *origin_x as isize + dx;
+            for dy in -1..=1
+            {
+                let y = *origin_y as isize + dy;
+                if self.is_within(&x, &y) && dx != 0 && dy != 0
+                {
+                    match self.board[x as usize][y as usize]
+                    {
+                        Tile::HiddenMine(false) =>
+                        {
+                            exposed = false;
+                        },
+                        Tile::Flagged(_) =>
+                        {
+                            exposed = false;
+                        },
+                        _ =>
+                        {
+                            // do nothing
+                        }
+                    }
+                }
+            }
+        }
+        return exposed;
     }
     fn find_nearby(&self, origin_x:&usize, origin_y:&usize)
     -> usize

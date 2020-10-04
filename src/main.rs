@@ -5,7 +5,9 @@ fn main() {
     {
         Ok(board) =>
         {
-            board.display()
+            board.display();
+            board.touch_tile(&4, &4);
+            board.display();
         }
         Err(message) =>
         {
