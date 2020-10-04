@@ -44,14 +44,16 @@ impl Board
     -> Result<Board, &'static str>
     {
         let mut board = Board{ board:vec!() };
-        let successful = board.generate(x_size, y_size, mines);
-        if successful
+        match board.generate(x_size, y_size, mines)
         {
-            return Ok(board)
-        }
-        else
-        {
-            return Err("Bad arguments")
+            true =>
+            {
+                return Ok(board);
+            },
+            false =>
+            {
+                return Err("Bad arguments")
+            }
         }
     }
     pub fn display(&self)
