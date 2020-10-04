@@ -1,6 +1,6 @@
 use rand::prelude::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Tile
 {
     Near(usize),
@@ -94,5 +94,89 @@ impl Board
             self.board.push(column);
         }
         return true;
+    }
+    fn touch_mine(&mut self, x:&usize, y:&usize)
+    -> Tile
+    {
+        match &self.board[*x][*y]
+        {
+            Tile::Near(n) =>
+            {
+                return Tile::Near(*n);
+            },
+            Tile::HiddenMine(value) =>
+            {
+                match value
+                {
+                    true =>
+                    {
+                        return Tile::Mined;
+                    },
+                    false =>
+                    {
+                        return Tile::Near(self.find_nearby(&x, &y));
+                    },
+                }
+            },
+            Tile::Flagged(boxed) =>
+            {
+                return Tile::Flagged(boxed.clone());
+            },
+            Tile::Mined =>
+            {
+                return Tile::Mined;
+            }
+        }
+    }
+    fn find_nearby(&self, origin_x:&usize, origin_y:&usize)
+    -> usize
+    {
+        let mut mines:usize = 0;
+        for dx in -1..=1
+        {
+            let x = (*origin_x as isize + dx) as usize;
+            for dy in -1..=1
+            {
+                let y = (*origin_y as isize + dy) as usize;
+                let is_mine = match &self.board[x][y]
+                {
+                    Tile::Mined =>
+                    {
+                        true
+                    },
+                    Tile::HiddenMine(true) =>
+                    {
+                        true
+                    },
+                    Tile::Flagged(boxed) =>
+                    {
+                        match **boxed
+                        {
+                            Tile::Mined =>
+                            {
+                                true
+                            },
+                            Tile::HiddenMine(true) =>
+                            {
+                                true
+                            },
+                            _ =>
+                            {
+                                false
+                            }
+                        }
+                    },
+                    _ =>
+                    {
+                        false
+                    },
+                };
+                if is_mine
+                {
+                    mines += 1;
+                }
+            }
+        }
+        return mines;
     }
 }
